@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "adaptive-brightness (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "adaptive-brightness (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
