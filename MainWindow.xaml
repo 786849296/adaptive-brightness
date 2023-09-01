@@ -6,10 +6,36 @@
     xmlns:local="using:adaptive_brightness"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tb="using:H.NotifyIcon"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-        <Image x:Name="imageControl" />
-    </StackPanel>
+    <tb:TaskbarIcon
+        x:Name="trayIcon"
+        ToolTipText="adaptive-brightness"
+        MenuActivation="RightClick"
+        ContextMenuMode="SecondWindow">
+        <tb:TaskbarIcon.IconSource>
+            <tb:GeneratedIconSource
+                FontFamily="Segoe Fluent Icons"
+                Text="&#xE706;"
+                FontSize="64"
+                FontWeight="Bold"
+                />
+        </tb:TaskbarIcon.IconSource>
+        <tb:TaskbarIcon.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem x:Name="setting" Text="setting">
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE713;"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="exit" Text="exit">
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE7E8;"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </tb:TaskbarIcon.ContextFlyout>
+    </tb:TaskbarIcon>
 </Window>

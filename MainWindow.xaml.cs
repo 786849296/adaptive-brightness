@@ -1,3 +1,4 @@
+using H.NotifyIcon.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -10,8 +11,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Windows.Input;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using WinRT;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -28,11 +31,23 @@ namespace adaptive_brightness
             this.InitializeComponent();
 
             //App.image = this.imageControl;
+            var settingCommand = new StandardUICommand(StandardUICommandKind.Open);
+            settingCommand.ExecuteRequested += SettingCommand_ExecuteRequested;
+            //setting.Command = settingCommand;
+            var exitCommand = new StandardUICommand(StandardUICommandKind.Close);
+            exitCommand.ExecuteRequested += ExitCommand_ExecuteRequested;
+            //exit.Command = exitCommand;
         }
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            myButton.Content = "Clicked";
+        private void SettingCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+        { 
+
         }
+
+        private void ExitCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
+        {
+            Application.Current.Exit();
+        }
+
     }
 }

@@ -21,6 +21,7 @@ using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Microsoft.Toolkit.Uwp.Notifications;
+using H.NotifyIcon;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -50,7 +51,7 @@ namespace adaptive_brightness
         /// <param name="args">Details about the launch request and process.</param>
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            //m_window = new MainWindow();
+            m_window = new MainWindow();
             //m_window.Activate();
 
             camera = new MediaCapture();
