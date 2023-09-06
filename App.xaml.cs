@@ -20,8 +20,7 @@ using Windows.Foundation.Collections;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Microsoft.Toolkit.Uwp.Notifications;
-using System.Diagnostics;
-using Microsoft.Management.Infrastructure;
+using Windows.System.Threading;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -50,22 +49,26 @@ namespace adaptive_brightness
         /// Invoked when the application is launched.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
             //m_window.Activate();
 
             camera = new MediaCapture();
-            await camera.InitializeAsync();
+            camera.InitializeAsync();
             camera.Failed += cameraInitFailed;
 
-            var lowLagCapture = await camera.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
-            var photo = await lowLagCapture.CaptureAsync();
-            var softwareBitmap = photo.Frame.SoftwareBitmap;
-            await lowLagCapture.FinishAsync();
+            TimeSpan time = TimeSpan.FromMinutes(3);
+            ThreadPoolTimer timer = ThreadPoolTimer.CreatePeriodicTimer(async (source) =>
+            {
+                var lowLagCapture = await camera.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
+                var photo = await lowLagCapture.CaptureAsync();
+                var softwareBitmap = photo.Frame.SoftwareBitmap;
+                await lowLagCapture.FinishAsync();
 
-            var brightnessSetter = new AdjustScreenByWmi();
-            brightnessSetter.StartupBrightness(50);
+                var brightnessSetter = new AdjustScreenByWmi();
+                brightnessSetter.StartupBrightness(50);
+            }, time);
 
             //if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 || softwareBitmap.BitmapAlphaMode == BitmapAlphaMode.Straight)
             //    softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
