@@ -17,11 +17,11 @@ using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
-using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Microsoft.Toolkit.Uwp.Notifications;
-using H.NotifyIcon;
+using System.Diagnostics;
+using Microsoft.Management.Infrastructure;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -39,6 +39,7 @@ namespace adaptive_brightness
         /// </summary>
         MediaCapture camera;
         //public static Image image { get; set; }
+        public double brightness = 0.5;
 
         public App()
         {
@@ -62,6 +63,9 @@ namespace adaptive_brightness
             var photo = await lowLagCapture.CaptureAsync();
             var softwareBitmap = photo.Frame.SoftwareBitmap;
             await lowLagCapture.FinishAsync();
+
+            var brightnessSetter = new AdjustScreenByWmi();
+            brightnessSetter.StartupBrightness(50);
 
             //if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 || softwareBitmap.BitmapAlphaMode == BitmapAlphaMode.Straight)
             //    softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);

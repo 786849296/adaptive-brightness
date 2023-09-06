@@ -5,7 +5,8 @@
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10"
+  IgnorableNamespaces="uap rescap iot">
 
   <Identity
     Name="b091c6fe-3dea-45ba-b2f5-e4affb2bfef1"
@@ -47,6 +48,7 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
+    <iot:Capability Name="systemManagement"/>
     <DeviceCapability Name="webcam"/>
   </Capabilities>
 </Package>

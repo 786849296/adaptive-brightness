@@ -31,12 +31,12 @@ namespace adaptive_brightness
             this.InitializeComponent();
 
             //App.image = this.imageControl;
-            var settingCommand = new StandardUICommand(StandardUICommandKind.Open);
+            var settingCommand = new StandardUICommand();
             settingCommand.ExecuteRequested += SettingCommand_ExecuteRequested;
-            //setting.Command = settingCommand;
-            var exitCommand = new StandardUICommand(StandardUICommandKind.Close);
+            setting.Command = settingCommand;
+            var exitCommand = new StandardUICommand();
             exitCommand.ExecuteRequested += ExitCommand_ExecuteRequested;
-            //exit.Command = exitCommand;
+            exit.Command = exitCommand;
         }
 
         private void SettingCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
