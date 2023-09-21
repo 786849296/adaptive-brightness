@@ -50,5 +50,6 @@
     <rescap:Capability Name="runFullTrust" />
     <iot:Capability Name="systemManagement"/>
     <DeviceCapability Name="webcam"/>
+    <DeviceCapability Name="bluetooth"/>
   </Capabilities>
 </Package>

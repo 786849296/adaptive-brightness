@@ -16,6 +16,7 @@
         x:Name="trayIcon"
         ToolTipText="adaptive-brightness"
         MenuActivation="RightClick"
+        
         >
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource

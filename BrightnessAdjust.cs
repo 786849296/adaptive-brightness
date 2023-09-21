@@ -105,7 +105,7 @@ namespace adaptive_brightness
 
             foreach (var obj in objCollection)
             {
-                CimMethodParametersCollection parameters = new CimMethodParametersCollection();
+                CimMethodParametersCollection parameters = new();
                 parameters.Add(CimMethodParameter.Create("Brightness", targetBrightness, CimFlags.In));
                 parameters.Add(CimMethodParameter.Create("Timeout", uint.MaxValue, CimFlags.In));
                 _session.InvokeMethod(obj, "WmiSetBrightness", parameters);
