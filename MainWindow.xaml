@@ -16,7 +16,7 @@
         x:Name="trayIcon"
         ToolTipText="adaptive-brightness"
         MenuActivation="RightClick"
-        
+        ContextMenuMode="SecondWindow"
         >
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource
@@ -28,11 +28,16 @@
         </tb:TaskbarIcon.IconSource>
         <tb:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem x:Name="setting" Text="setting">
-                    <MenuFlyoutItem.Icon>
+                <MenuFlyoutSubItem x:Name="setting" Text="setting">
+                    <MenuFlyoutSubItem.Icon>
                         <FontIcon Glyph="&#xE713;"/>
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
+                    </MenuFlyoutSubItem.Icon>
+                    <RadioMenuFlyoutItem x:Name="luxGetter_camera" GroupName="luxGetter" Text="camera" />
+                    <RadioMenuFlyoutItem x:Name="luxGetter_sensor" GroupName="luxGetter" Text="sensor" IsChecked="True" />
+                    <MenuFlyoutSeparator />
+                    <RadioMenuFlyoutItem x:Name="curve_phone" GroupName="curve" Text="phone" />
+                    <RadioMenuFlyoutItem x:Name="curve_bucket" GroupName="curve" Text="bucket" IsChecked="True" />
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Name="exit" Text="exit">
                     <MenuFlyoutItem.Icon>

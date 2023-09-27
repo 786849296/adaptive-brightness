@@ -26,22 +26,17 @@ namespace adaptive_brightness
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        public bool is_luxSensor { get { return luxGetter_sensor.IsChecked; } }
+        public bool is_curveBucket { get { return curve_bucket.IsChecked; } }
+
         public MainWindow()
         {
             this.InitializeComponent();
 
             //App.image = this.imageControl;
-            var settingCommand = new StandardUICommand();
-            settingCommand.ExecuteRequested += SettingCommand_ExecuteRequested;
-            setting.Command = settingCommand;
             var exitCommand = new StandardUICommand();
             exitCommand.ExecuteRequested += ExitCommand_ExecuteRequested;
             exit.Command = exitCommand;
-        }
-
-        private void SettingCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)
-        { 
-
         }
 
         private void ExitCommand_ExecuteRequested(XamlUICommand sender, ExecuteRequestedEventArgs args)

@@ -43,7 +43,7 @@ namespace adaptive_brightness
         /// Returns the current brightness setting
         /// </summary>
         /// <returns></returns>
-        private int GetBrightness()
+        public int GetBrightness()
         {
             //using ManagementObjectSearcher searcher = new(_scope, _query);
             //using ManagementObjectCollection objCollection = searcher.Get();

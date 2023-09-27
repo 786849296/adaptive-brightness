@@ -51,7 +51,9 @@ namespace adaptive_brightness
         /// </summary>
         //public static Image image { get; set; }
         //https://learn.microsoft.com/zh-cn/windows-hardware/design/device-experiences/images/adaptive-brightness-ambient-light-response-curve.png
-        public int[,] brightnessBucket = new int[7, 2] { { 0, 100 }, { 50, 300 }, { 200, 400 }, { 300, 500 }, { 300, 1700 }, { 1100, 3000 }, { 2000, 5000 } };
+        public readonly int[,] brightnessBucket = new int[7, 3] { { 0, 100, 36 }, { 50, 300, 47 }, { 200, 400, 60 }, { 250, 500, 72 }, { 300, 1700, 85 }, { 1100, 3000, 92 }, { 2000, 5000, 100 } };
+        public int curBucket = 0;
+        private AdjustScreenByWmi brightnessSetter = new();
 
         public App()
         {
@@ -67,53 +69,63 @@ namespace adaptive_brightness
             m_window = new MainWindow();
             //m_window.Activate();
 
-            //MediaCapture camera = new MediaCapture();
-            //await camera.InitializeAsync();
-            //camera.Failed += cameraInitFailed;
-            //var settings = new AdvancedPhotoCaptureSettings { Mode = AdvancedPhotoMode.Auto };
-            //camera.VideoDeviceController.AdvancedPhotoControl.Configure(settings);
-            //var photoProperties = camera.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo);
-            //VideoEncodingProperties photoPropertie = new();
-            //foreach (VideoEncodingProperties p in photoProperties)
-            //    if (p.Subtype == "NV12" && p.Width > photoPropertie.Width)
-            //        photoPropertie = p;
-            //camera.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, photoPropertie);
-            //AdvancedPhotoCapture advancedPhoto = await camera.PrepareAdvancedPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Nv12));
+            var curBrightness = brightnessSetter.GetBrightness();
+            for (int i = 0; i < brightnessBucket.GetLength(0); i++)
+                if (brightnessBucket[i, 2] >= curBrightness)
+                {
+                    curBucket = i;
+                    break;
+                }
+
+            MediaCapture camera = new MediaCapture();
+            await camera.InitializeAsync();
+            camera.Failed += cameraInitFailed;
+            var settings = new AdvancedPhotoCaptureSettings { Mode = AdvancedPhotoMode.Auto };
+            camera.VideoDeviceController.AdvancedPhotoControl.Configure(settings);
+            var photoProperties = camera.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo);
+            VideoEncodingProperties photoPropertie = new();
+            foreach (VideoEncodingProperties p in photoProperties)
+                if (p.Subtype == "NV12" && p.Width > photoPropertie.Width)
+                    photoPropertie = p;
+            camera.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, photoPropertie);
+            AdvancedPhotoCapture advancedPhoto = await camera.PrepareAdvancedPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Nv12));
 
             //var queueController = DispatcherQueueController.CreateOnDedicatedThread();
             //var queue = queueController.DispatcherQueue;
-            //var timer = m_window.DispatcherQueue.CreateTimer();
-            //timer.Interval = TimeSpan.FromSeconds(10);
-            //timer.IsRepeating = true;
-            //timer.Tick += async (s, e) =>
-            //{
-            //    //var lowLagCapture = await camera.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
-            //    AdvancedCapturedPhoto photo = await advancedPhoto.CaptureAsync();
-            //    var bitmap = photo.Frame.SoftwareBitmap;
-            //    double lumaAvg = 0;
-            //    using (BitmapBuffer buffer = bitmap.LockBuffer(BitmapBufferAccessMode.Read))
-            //        using (var reference = buffer.CreateReference())
-            //        unsafe {
-            //            byte* dataInBytes;
-            //            uint capacity;
-            //            reference.As<IMemoryBufferByteAccess>().GetBuffer(out dataInBytes, out capacity);
+            var timer = m_window.DispatcherQueue.CreateTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.IsRepeating = true;
+            timer.Tick += async (s, e) =>
+            {
+                //var lowLagCapture = await camera.PrepareLowLagPhotoCaptureAsync(ImageEncodingProperties.CreateUncompressed(MediaPixelFormat.Bgra8));
+                if ((m_window as MainWindow).is_luxSensor)
+                    return;
+                AdvancedCapturedPhoto photo = await advancedPhoto.CaptureAsync();
+                var bitmap = photo.Frame.SoftwareBitmap;
+                double lumaAvg = 0;
+                using (BitmapBuffer buffer = bitmap.LockBuffer(BitmapBufferAccessMode.Read))
+                    using (var reference = buffer.CreateReference())
+                        unsafe
+                        {
+                            byte* dataInBytes;
+                            uint capacity;
+                            reference.As<IMemoryBufferByteAccess>().GetBuffer(out dataInBytes, out capacity);
 
-            //            BitmapPlaneDescription bufferLayout = buffer.GetPlaneDescription(0);
-            //            for (int i = 0; i < bufferLayout.Height; i++)
-            //                for (int j = 0; j < bufferLayout.Width; j++)
-            //                    lumaAvg += dataInBytes[bufferLayout.StartIndex + i * bufferLayout.Stride + j] / (photoPropertie.Width * photoPropertie.Height * 1.0);
-            //        }
+                            BitmapPlaneDescription bufferLayout = buffer.GetPlaneDescription(0);
+                            for (int i = 0; i < bufferLayout.Height; i++)
+                                for (int j = 0; j < bufferLayout.Width; j++)
+                                    lumaAvg += dataInBytes[bufferLayout.StartIndex + i * bufferLayout.Stride + j] / (photoPropertie.Width * photoPropertie.Height * 1.0);
+                        }
 
-            //    //bitmap = SoftwareBitmap.Convert(bitmap, BitmapPixelFormat.Gray8, BitmapAlphaMode.Premultiplied);
-            //    //自定义系数，假设最大亮度5000lux
-            //    double coefficient = 5000.0 / 255.0;
-            //    double lux = lumaAvg * coefficient;
-            //    await advancedPhoto.FinishAsync();
+                //bitmap = SoftwareBitmap.Convert(bitmap, BitmapPixelFormat.Gray8, BitmapAlphaMode.Premultiplied);
+                //自定义系数，假设最大亮度5000lux
+                double coefficient = 5000.0 / 255.0;
+                double lux = lumaAvg * coefficient;
+                await advancedPhoto.FinishAsync();
 
-            //    var brightnessSetter = new AdjustScreenByWmi();
-            //    brightnessSetter.StartupBrightness(50);
-            //};
-            //timer.Start();
+                brightnessAdaptive((float)lux, 0, (m_window as MainWindow).is_curveBucket);
+            };
+            timer.Start();
 
             BluetoothLEAdvertisementWatcher watcher = new BluetoothLEAdvertisementWatcher();
             watcher.AllowExtendedAdvertisements = true;
@@ -124,12 +136,21 @@ namespace adaptive_brightness
             {
                 //type 0x21: ServiceData128BitUuids
                 //不同手机是否会有差异？未知
+                bool is_luxSensor = false, is_curveBucket = false;
+                m_window.DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.High, () => 
+                {
+                    is_luxSensor = (m_window as MainWindow).is_luxSensor;
+                    is_curveBucket = (m_window as MainWindow).is_curveBucket;
+                });
+                if (!is_luxSensor)
+                    return;
                 var data = args.Advertisement.GetSectionsByType(0x21).First().Data;
                 DataReader dataReader = DataReader.FromBuffer(data);
                 dataReader.ByteOrder = ByteOrder.LittleEndian;
                 Guid uuid = dataReader.ReadGuid();
                 float lux = dataReader.ReadSingle();
                 int brightness = dataReader.ReadInt32();
+                brightnessAdaptive(lux, brightness, is_curveBucket);
             };
             watcher.Start();
             Debug.WriteLine(watcher.Status);
@@ -154,6 +175,28 @@ namespace adaptive_brightness
                 .AddText("Camera init failed")
                 .AddText(e)
                 .Show();
+        }
+
+        public void brightnessAdaptive(float lux, int brightnessPhone, bool is_curveBucket)
+        {
+            if (brightnessPhone == 0)
+                brightnessPhone = brightnessSetter.GetBrightness();
+            if (is_curveBucket)
+            {
+                while (lux > brightnessBucket[curBucket, 1])
+                    curBucket++;
+                while (lux < brightnessBucket[curBucket, 0])
+                    curBucket--;
+                brightnessPhone = brightnessBucket[curBucket, 2];
+            }
+            else
+                for (int i = 0; i < brightnessBucket.GetLength(0); i++)
+                    if (brightnessBucket[i, 2] >= brightnessPhone)
+                    {
+                        curBucket = i;
+                        break;
+                    }
+            brightnessSetter.StartupBrightness(brightnessPhone);
         }
 
         private Window m_window;
